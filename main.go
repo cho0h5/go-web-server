@@ -4,11 +4,16 @@ import (
     "fmt"
     "net"
     "log"
+    "os"
 )
 
 func main() {
-    fmt.Println("Start Server");
+    fmt.Println("Start Server")
 
+    startServer()
+}
+
+func startServer() {
     l, err := net.Listen("tcp", ":8080")
     if err != nil {
       log.Fatal(err)
@@ -26,8 +31,20 @@ func main() {
 }
 
 func handler(conn net.Conn) {
-    data := "HTTP/1.1 200 OK\n\nhello"
-    conn.Write([]byte(data))
+    header := "HTTP/1.1 200 OK\r\n\r\n"
+    conn.Write([]byte(header))
+
+    f, err := os.Open("static/index.html")
+    if err != nil {
+        log.Println(err)
+    }
+
+    b:= make([]byte, 1024)
+    _, err = f.Read(b)
+    if err != nil {
+        log.Println(err)
+    }
+    conn.Write(b)
 
     conn.Close()
 }
